@@ -8,7 +8,7 @@ load_dotenv()
 
 # Получаем URL базы данных
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
+    "DATABASE_URL",
     "postgresql://postgres:password@localhost:5432/gas_humidity_db"
 )
 

@@ -18,7 +18,6 @@ def health_check(db: Session = Depends(get_db)):
         db_status = "healthy"
     except Exception as e:
         db_status = f"unhealthy: {str(e)}"
-    
     return {
         "status": "healthy",
         "timestamp": datetime.datetime.now().isoformat(),
@@ -40,13 +39,10 @@ def get_metrics(db: Session = Depends(get_db)):
     """Метрики для мониторинга (Prometheus format)"""
     # Количество точек
     points_count = db.execute(text('SELECT COUNT(*) FROM "Measuring_point"')).scalar()
-    
     # Количество данных
     data_count = db.execute(text('SELECT COUNT(*) FROM "Calculated_data"')).scalar()
-    
     # Последняя запись
     last_record = db.execute(text('SELECT MAX(data_and_time) FROM "Calculated_data"')).scalar()
-    
     return {
         "points_total": points_count,
         "data_total": data_count,

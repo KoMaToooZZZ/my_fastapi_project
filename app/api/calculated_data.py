@@ -37,7 +37,6 @@ def create_calculated_data(
     # Проверяем существует ли точка измерения
     if not crud_measuring_point.get(db, data.id_point):
         raise HTTPException(status_code=404, detail="Measuring point not found")
-    
     return crud_calculated_data.create(db, data)
 
 @router.put("/calculated-data/{data_id}", response_model=CalculatedDataSchema)
@@ -70,7 +69,6 @@ def get_data_by_point(
     """Получить расчетные данные по ID точки измерения"""
     if not crud_measuring_point.get(db, point_id):
         raise HTTPException(status_code=404, detail="Measuring point not found")
-    
     return crud_calculated_data.get_by_point(db, point_id, skip, limit)
 
 @router.get("/calculated-data/date-range", response_model=List[CalculatedDataSchema])
@@ -84,12 +82,10 @@ def get_data_by_date_range(
     query = db.query(CalculatedDataModel).filter(
         CalculatedDataModel.data_and_time.between(start_date, end_date)
     )
-    
     if point_id:
         query = query.filter(CalculatedDataModel.id_point == point_id)
         if not crud_measuring_point.get(db, point_id):
             raise HTTPException(status_code=404, detail="Measuring point not found")
-    
     return query.order_by(CalculatedDataModel.data_and_time).all()
 
 @router.post("/calculated-data/batch", response_model=List[CalculatedDataSchema])
@@ -103,10 +99,8 @@ def create_batch_calculated_data(
         # Проверяем точку измерения
         if not crud_measuring_point.get(db, data.id_point):
             raise HTTPException(status_code=404, detail=f"Measuring point {data.id_point} not found")
-        
         created = crud_calculated_data.create(db, data)
         results.append(created)
-    
     return results
 
 @router.get("/calculated-data/aggregated")
@@ -124,8 +118,7 @@ def get_aggregated_data(
     elif aggregation == "weekly":
         interval = "DATE_TRUNC('week', data_and_time)"
     else:  # monthly
-        interval = "DATE_TRUNC('month', data_and_time)"
-    
+        interval = "DATE_TRUNC('month', data_and_time)" 
     # Строим запрос
     sql = f"""
         SELECT 
@@ -136,21 +129,16 @@ def get_aggregated_data(
         FROM "Calculated_data"
         WHERE 1=1
     """
-    
     params = {}
     if point_id:
         sql += " AND id_point = :point_id"
         params["point_id"] = point_id
-    
     if start_date:
         sql += " AND data_and_time >= :start_date"
         params["start_date"] = start_date
-    
     if end_date:
         sql += " AND data_and_time <= :end_date"
         params["end_date"] = end_date
-    
     sql += " GROUP BY period ORDER BY period"
-    
     result = db.execute(text(sql), params)
     return [dict(row) for row in result]

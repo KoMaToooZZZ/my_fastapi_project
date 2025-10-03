@@ -6,7 +6,6 @@ logger = logging.getLogger(__name__)
 
 class HumidityCalculator:
     """Класс для расчетов влажности по формулам из ТЗ"""
-    
     # Константы из ТЗ (п. 6.2.2)
     A0 = 1.5435
     A1 = 0.07374
@@ -16,7 +15,6 @@ class HumidityCalculator:
     B2 = -0.000201
     P_ATM = 1.033
     P = 40
-    
     # Таблица для определения ТТР смеси (упрощенная версия из Приложения Г)
     DEW_POINT_TABLE = {
         0.030: -23.1, 0.035: -21.1, 0.040: -19.4, 0.045: -17.9,
@@ -26,7 +24,6 @@ class HumidityCalculator:
         0.450: 15.7,  0.500: 17.7,  0.600: 20.8,  0.700: 23.4,
         0.800: 25.9,  0.900: 28.0,  1.000: 29.8
     }
-    
     @classmethod
     def calculate_humidity_content(cls, dew_point: float) -> float:
         """
@@ -43,7 +40,6 @@ class HumidityCalculator:
         except (OverflowError, ValueError) as e:
             logger.error(f"Error in humidity calculation: {e}")
             return 0.0
-    
     @classmethod
     def calculate_water_mass(cls, humidity_content: float, gas_volume: float) -> float:
         """
@@ -51,7 +47,6 @@ class HumidityCalculator:
         Формула из п. 6.2.2 ТЗ: W = w * V
         """
         return humidity_content * gas_volume
-    
     @classmethod
     def calculate_mixture_dew_point(cls, mixture_humidity: float) -> float:
         """
@@ -60,43 +55,33 @@ class HumidityCalculator:
         """
         if mixture_humidity <= 0:
             return -50.0  # Минимальное значение
-        
         # Находим ближайшие значения в таблице
         sorted_humidities = sorted(cls.DEW_POINT_TABLE.keys())
-        
         if mixture_humidity <= sorted_humidities[0]:
             return cls.DEW_POINT_TABLE[sorted_humidities[0]]
         if mixture_humidity >= sorted_humidities[-1]:
             return cls.DEW_POINT_TABLE[sorted_humidities[-1]]
-        
         # Находим ближайшие значения для интерполяции
         lower_humidity = None
         upper_humidity = None
-        
         for i in range(len(sorted_humidities) - 1):
             if sorted_humidities[i] <= mixture_humidity <= sorted_humidities[i + 1]:
                 lower_humidity = sorted_humidities[i]
                 upper_humidity = sorted_humidities[i + 1]
                 break
-        
         if lower_humidity is None or upper_humidity is None:
             return cls.DEW_POINT_TABLE[sorted_humidities[0]]
-        
         # Линейная интерполяция
         lower_dew_point = cls.DEW_POINT_TABLE[lower_humidity]
         upper_dew_point = cls.DEW_POINT_TABLE[upper_humidity]
-        
         # Интерполяция: y = y1 + (x - x1) * (y2 - y1) / (x2 - x1)
         interpolated_dew_point = lower_dew_point + (mixture_humidity - lower_humidity) * \
                                (upper_dew_point - lower_dew_point) / (upper_humidity - lower_humidity)
-        
         return round(interpolated_dew_point, 2)
-    
     @classmethod
     def get_ost_threshold(cls, season: str = "summer") -> float:
         """Получить пороговое значение ТТР по ОСТ"""
         return -14.0 if season.lower() == "summer" else -20.0
-    
     @classmethod
     def calculate_ost_water_content(cls, season: str = "summer") -> float:
         """Расчет влагосодержания по ОСТ значениям"""

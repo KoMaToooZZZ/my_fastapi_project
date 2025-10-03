@@ -28,7 +28,6 @@ class MeasuringPointUpdate(BaseModel):
 
 class MeasuringPoint(MeasuringPointBase):
     id_point: int
-    
     class Config:
         from_attributes = True
 
@@ -56,7 +55,6 @@ class CalculatedDataUpdate(BaseModel):
 
 class CalculatedData(CalculatedDataBase):
     id_data: int
-    
     class Config:
         from_attributes = True
 

@@ -6,10 +6,10 @@ import logging
 from app.services.humidity_calculations import HumidityCalculator
 from app.utils.units_converter import UnitsConverter
 from app.schemas.schemas import (
-    GasVolumeInput, 
-    SingleVolumeRequest, 
+    GasVolumeInput,
+    SingleVolumeRequest,
     SingleVolumeResponse,
-    GasMixtureRequest, 
+    GasMixtureRequest,
     GasMixtureResponse
 )
 
@@ -24,38 +24,30 @@ async def calculate_single_volume(request: SingleVolumeRequest):
     """
     if len(request.volumes) == 0:
         raise HTTPException(status_code=400, detail="At least one volume required")
-    
     if len(request.volumes) > 2:
         raise HTTPException(status_code=400, detail="Maximum 2 volumes supported")
-    
     results = []
     total_water_masses = []
-    
     try:
         for i, volume in enumerate(request.volumes):
             # Конвертируем объем в базовые единицы (куб. м)
             base_volume = UnitsConverter.convert_volume(
-                volume.gas_volume, 
-                volume.volume_unit, 
+                volume.gas_volume,
+                volume.volume_unit,
                 'cubic_meter'
             )
-            
             # Конвертируем температуру (если потребуется в будущем)
             base_dew_point = UnitsConverter.convert_dew_point(
                 volume.dew_point,
                 volume.dew_point_unit,
                 'celsius'
             )
-            
             # Расчет влагосодержания
             humidity_content = HumidityCalculator.calculate_humidity_content(base_dew_point)
-            
             # Расчет общего количества воды
             water_mass_grams = HumidityCalculator.calculate_water_mass(humidity_content, base_volume)
-            
             # Конвертируем обратно в запрошенные единицы
             water_mass_display = UnitsConverter.convert_mass(water_mass_grams, 'gram', 'gram')
-            
             results.append({
                 "volume_index": i + 1,
                 "input_data": volume.dict(),
@@ -65,7 +57,6 @@ async def calculate_single_volume(request: SingleVolumeRequest):
                 "base_dew_point_celsius": base_dew_point
             })
             total_water_masses.append(water_mass_grams)
-        
         # Расчет разницы если два объема
         difference = None
         if len(total_water_masses) == 2:
@@ -76,9 +67,7 @@ async def calculate_single_volume(request: SingleVolumeRequest):
                 "direction": "increase" if mass_difference > 0 else "decrease",
                 "percentage_difference": abs(mass_difference) / total_water_masses[0] * 100 if total_water_masses[0] > 0 else 0
             }
-        
         return SingleVolumeResponse(results=results, difference=difference)
-    
     except Exception as e:
         logger.error(f"Error in single volume calculation: {e}")
         raise HTTPException(status_code=500, detail=f"Calculation error: {str(e)}")
@@ -91,47 +80,38 @@ async def calculate_gas_mixture(request: GasMixtureRequest):
     """
     if len(request.components) == 0:
         raise HTTPException(status_code=400, detail="At least one component required")
-    
     try:
         total_volume = 0
         weighted_humidity_sum = 0
-        
         for component in request.components:
             # Конвертируем объем в базовые единицы
             base_volume = UnitsConverter.convert_volume(
-                component.gas_volume, 
-                component.volume_unit, 
+                component.gas_volume,
+                component.volume_unit,
                 'cubic_meter'
             )
-            
             # Конвертируем температуру
             base_dew_point = UnitsConverter.convert_dew_point(
                 component.dew_point,
                 component.dew_point_unit,
                 'celsius'
             )
-            
             # Расчет влагосодержания для каждого компонента
             humidity_content = HumidityCalculator.calculate_humidity_content(base_dew_point)
-            
             total_volume += base_volume
             weighted_humidity_sum += humidity_content * base_volume
-        
         # Расчет параметров смеси
         mixture_water_content = weighted_humidity_sum / total_volume if total_volume > 0 else 0
         total_water_mass_grams = mixture_water_content * total_volume
         mixture_dew_point = HumidityCalculator.calculate_mixture_dew_point(mixture_water_content)
-        
         # Конвертируем общий объем обратно в тыс. куб. м для отображения
         display_volume = UnitsConverter.convert_volume(total_volume, 'cubic_meter', 'thousand_cubic_meters')
-        
         return GasMixtureResponse(
             mixture_volume=round(display_volume, 2),
             mixture_water_content=round(mixture_water_content, 6),
             total_water_mass=round(total_water_mass_grams / 1000000, 6),  # в тоннах
             mixture_dew_point=round(mixture_dew_point, 2)
         )
-    
     except Exception as e:
         logger.error(f"Error in gas mixture calculation: {e}")
         raise HTTPException(status_code=500, detail=f"Calculation error: {str(e)}")
@@ -144,14 +124,12 @@ async def get_ost_values(season: str = "summer"):
     try:
         ost_threshold = HumidityCalculator.get_ost_threshold(season)
         ost_water_content = HumidityCalculator.calculate_humidity_content(ost_threshold)
-        
         return {
             "season": season,
             "ost_dew_point": ost_threshold,
             "ost_water_content": ost_water_content,
             "description": f"ОСТ значения для {season} сезона"
         }
-    
     except Exception as e:
         logger.error(f"Error getting OST values: {e}")
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")

@@ -8,10 +8,10 @@ from .export import router as export_router
 
 __all__ = [
     "measuring_points_router",
-    "calculated_data_router", 
+    "calculated_data_router",
     "analytics_router",
     "system_router",
     "calculator_router",
-    "reports_router", 
+    "reports_router",
     "export_router"
 ]

@@ -17,7 +17,6 @@ def get_analytics_summary(db: Session = Depends(get_db)):
             COUNT(DISTINCT id_parent_point) as hierarchy_levels
         FROM "Measuring_point"
     """)).first()
-    
     # Статистика по данным
     data_stats = db.execute(text("""
         SELECT 
@@ -28,7 +27,6 @@ def get_analytics_summary(db: Session = Depends(get_db)):
             AVG(parametr_q) as global_avg_q
         FROM "Calculated_data"
     """)).first()
-    
     return {
         "points_summary": {
             "total_points": points_stats[0],
@@ -58,8 +56,7 @@ def get_analytics_trends(
     elif period == "month":
         interval = "DATE_TRUNC('month', data_and_time)"
     else:  # day
-        interval = "DATE(data_and_time)"
-    
+        interval = "DATE(data_and_time)" 
     trends = db.execute(text(f"""
         SELECT 
             {interval} as period,
@@ -73,7 +70,6 @@ def get_analytics_trends(
     """)).fetchall()
     
     return [dict(row) for row in trends]
-
 @router.get("/reports/daily")
 def get_daily_report(
     date: str = None,  # Если None - берется вчерашний день
@@ -82,7 +78,6 @@ def get_daily_report(
     """Сформировать ежедневный отчет"""
     if not date:
         date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-    
     report_data = db.execute(text("""
         SELECT 
             mp.name_point,
@@ -98,12 +93,10 @@ def get_daily_report(
         GROUP BY mp.id_point, mp.name_point
         ORDER BY mp.id_point
     """), {"date": date}).fetchall()
-    
     return {
         "report_date": date,
         "points": [dict(row) for row in report_data]
     }
-
 @router.post("/reports/generate")
 def generate_custom_report(
     report_config: dict,
@@ -116,7 +109,6 @@ def generate_custom_report(
     #     "date_range": {"start": "2024-01-01", "end": "2024-01-31"},
     #     "point_ids": [1, 2, 3],
     #     "metrics": ["parametr_ttr", "parametr_q"]
-    # }
-    
+    # } 
     # Здесь будет логика генерации отчета по конфигурации
     return {"status": "report_generated", "config": report_config}

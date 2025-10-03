@@ -92,7 +92,6 @@ async def find_water_intrusion_events(
                 "event_type": "Останов-пуск участков"
             }
         ]
-        
         return {
             "report_period": f"{request.start_date} - {request.end_date}",
             "events_found": len(mock_events),
@@ -154,8 +153,8 @@ async def get_input_output_summary(
 async def reports_health():
     """Проверка здоровья модуля отчетов"""
     return {
-        "status": "healthy", 
-        "module": "reports", 
+        "status": "healthy",
+        "module": "reports",
         "timestamp": datetime.now().isoformat(),
         "endpoints": ["exceeded-ost", "water-intrusion-events", "input-output-summary"]
     }

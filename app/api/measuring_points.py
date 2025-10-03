@@ -13,7 +13,7 @@ router = APIRouter()
 # Базовые CRUD операции
 @router.get("/measuring-points/", response_model=List[MeasuringPointSchema])
 def get_measuring_points(
-    skip: int = 0, 
+    skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db)
 ):
@@ -70,27 +70,23 @@ def get_point_calculated_data(
     # Проверяем существует ли точка
     if not crud_measuring_point.get(db, point_id):
         raise HTTPException(status_code=404, detail="Measuring point not found")
-    
     return crud_calculated_data.get_by_point(db, point_id, skip, limit)
 
 @router.get("/measuring-points/tree")
 def get_measuring_points_tree(db: Session = Depends(get_db)):
     """Получить иерархию точек измерений (родитель-потомок)"""
     points = crud_measuring_point.get_all(db)
-    
     # Строим дерево
     tree = []
-    
     for point in points:
         if point.id_parent_point is None:
             tree.append({
                 "point": MeasuringPointSchema.from_orm(point),
                 "children": [
-                    MeasuringPointSchema.from_orm(child) for child in points 
+                    MeasuringPointSchema.from_orm(child) for child in points
                     if child.id_parent_point == point.id_point
                 ]
             })
-    
     return tree
 
 @router.get("/measuring-points/search", response_model=List[MeasuringPointSchema])
@@ -112,7 +108,6 @@ def get_point_statistics(point_id: int, db: Session = Depends(get_db)):
     point = crud_measuring_point.get(db, point_id)
     if not point:
         raise HTTPException(status_code=404, detail="Measuring point not found")
-    
     # Статистика по расчетным данным
     data_stats = db.execute(text("""
         SELECT 
@@ -126,7 +121,6 @@ def get_point_statistics(point_id: int, db: Session = Depends(get_db)):
         FROM "Calculated_data" 
         WHERE id_point = :point_id
     """), {"point_id": point_id}).first()
-    
     return {
         "point_info": MeasuringPointSchema.from_orm(point),
         "statistics": {

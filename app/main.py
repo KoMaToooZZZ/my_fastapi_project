@@ -10,13 +10,13 @@ from fastapi import FastAPI
 
 # Импортируем все роутеры
 from app.api import (
-    measuring_points, 
-    calculated_data, 
-    analytics, 
+    measuring_points,
+    calculated_data,
+    analytics,
     system,
-    calculator,     
-    reports,        
-    export          
+    calculator,
+    reports,
+    export
 )
 from app.database import engine, Base
 
@@ -48,7 +48,7 @@ def read_root():
         "version": "1.0.0",
         "modules": [
             "Точки измерений",
-            "Расчетные данные", 
+            "Расчетные данные",
             "Аналитика и отчеты",
             "Калькулятор влажности",
             "Специализированные отчеты",
