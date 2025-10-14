@@ -7,6 +7,7 @@ project_root = os.path.dirname(current_dir)
 sys.path.insert(0, project_root)
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware  # ← ДОБАВЬТЕ ЭТУ СТРОКУ
 
 # Импортируем все роутеры
 from app.api import (
@@ -31,6 +32,15 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+# Настройка CORS (Cross-Origin Resource Sharing)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Подключаем все роутеры
 app.include_router(measuring_points.router, prefix="/api/v1", tags=["Точки измерений"])
 app.include_router(calculated_data.router, prefix="/api/v1", tags=["Расчетные данные"])
@@ -53,7 +63,7 @@ def read_root():
             "Калькулятор влажности",
             "Специализированные отчеты",
             "Экспорт данных",
-            "Система"
+            "Системa"
         ]
     }
 
