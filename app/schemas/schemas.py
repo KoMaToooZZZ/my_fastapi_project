@@ -87,7 +87,7 @@ class ExceededOstRequest(BaseModel):
     end_date: str
     exceedance_threshold: float = 3.0
     duration_threshold: int = 2
-    measurement_point_ids: List[float]
+    measurement_point_ids: List[int]  # Исправлено с float на int
     season: str = "summer"
 
 class ExceededOstResponse(BaseModel):
@@ -109,8 +109,8 @@ class ExportRequest(BaseModel):
 
 # Схемы для аналитики
 class InputOutputSummaryRequest(BaseModel):
-    input_point_ids: List[float]
-    output_point_ids: List[float]
+    input_point_ids: List[int]  # Исправлено с float на int
+    output_point_ids: List[int]  # Исправлено с float на int
     start_date: str
     end_date: str
     data_interval: str = "hourly"

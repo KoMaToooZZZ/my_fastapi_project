@@ -7,7 +7,7 @@ project_root = os.path.dirname(current_dir)
 sys.path.insert(0, project_root)
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware  # ← ДОБАВЬТЕ ЭТУ СТРОКУ
+from fastapi.middleware.cors import CORSMiddleware
 
 # Импортируем все роутеры
 from app.api import (
@@ -35,7 +35,7 @@ app = FastAPI(
 # Настройка CORS (Cross-Origin Resource Sharing)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,7 +55,7 @@ def read_root():
     return {
         "message": "Gas Humidity Calculation System API работает!",
         "documentation": "/docs",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "modules": [
             "Точки измерений",
             "Расчетные данные",
@@ -73,7 +73,7 @@ def api_health():
     return {
         "status": "healthy",
         "service": "Gas Humidity Calculation System",
-        "version": "1.0.0"
+        "version": "2.0.0"
     }
 
 if __name__ == "__main__":
