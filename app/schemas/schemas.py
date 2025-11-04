@@ -65,12 +65,27 @@ class GasVolumeInput(BaseModel):
     dew_point: float
     dew_point_unit: str = "celsius"
 
+# Специфичные схемы для результатов расчета
+class VolumeResult(BaseModel):
+    volume_index: int
+    input_data: GasVolumeInput
+    water_content_per_cubic_meter: float
+    total_water_mass: float
+    base_volume_cubic_meters: float
+    base_dew_point_celsius: float
+
+class VolumeDifference(BaseModel):
+    water_mass_difference_grams: float
+    water_mass_difference_kilograms: float
+    direction: str
+    percentage_difference: float
+
 class SingleVolumeRequest(BaseModel):
     volumes: List[GasVolumeInput]
 
 class SingleVolumeResponse(BaseModel):
-    results: List[dict]
-    difference: Optional[dict] = None
+    results: List[VolumeResult]
+    difference: Optional[VolumeDifference] = None
 
 class GasMixtureRequest(BaseModel):
     components: List[GasVolumeInput]
@@ -82,21 +97,6 @@ class GasMixtureResponse(BaseModel):
     mixture_dew_point: float
 
 # Схемы для отчетов
-class ExceededOstRequest(BaseModel):
-    start_date: str
-    end_date: str
-    exceedance_threshold: float = 3.0
-    duration_threshold: int = 2
-    measurement_point_ids: List[int]  # Исправлено с float на int
-    season: str = "summer"
-
-class ExceededOstResponse(BaseModel):
-    point_name: str
-    average_dew_point: float
-    ost_threshold: float
-    exceedance_period: str
-    duration_hours: float
-
 class WaterIntrusionRequest(BaseModel):
     start_date: str
     end_date: str
@@ -109,8 +109,8 @@ class ExportRequest(BaseModel):
 
 # Схемы для аналитики
 class InputOutputSummaryRequest(BaseModel):
-    input_point_ids: List[int]  # Исправлено с float на int
-    output_point_ids: List[int]  # Исправлено с float на int
+    input_point_ids: List[int]
+    output_point_ids: List[int]
     start_date: str
     end_date: str
     data_interval: str = "hourly"

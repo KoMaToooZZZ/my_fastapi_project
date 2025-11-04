@@ -109,21 +109,3 @@ class HumidityCalculator:
         result = round(interpolated_dew_point, 2)
         logger.debug(f"Mixture dew point: humidity={mixture_humidity}, result={result}")
         return result
-    
-    @classmethod
-    def get_ost_threshold(cls, season: str = "summer") -> float:
-        """Получить пороговое значение ТТР по ОСТ"""
-        season_lower = season.lower()
-        if season_lower == "summer":
-            return -14.0
-        elif season_lower == "winter":
-            return -20.0
-        else:
-            logger.warning(f"Неизвестный сезон: {season}, используется летнее значение")
-            return -14.0
-    
-    @classmethod
-    def calculate_ost_water_content(cls, season: str = "summer") -> float:
-        """Расчет влагосодержания по ОСТ значениям"""
-        ost_threshold = cls.get_ost_threshold(season)
-        return cls.calculate_humidity_content(ost_threshold)

@@ -6,8 +6,6 @@ import pandas as pd
 import io
 import logging
 
-from app.services.humidity_calculations import HumidityCalculator
-
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
@@ -59,12 +57,11 @@ async def export_calculator_data(parameters: Dict[str, Any], format: str = "exce
 
 async def export_report_data(parameters: Dict[str, Any], format: str = "excel"):
     """Экспорт отчетных данных"""
-    # Пример данных отчета "Поиск превышения ТТР по ОСТ"
+    # Пример данных отчета
     report_data = {
         "Точка замера": ["КС-17 (Вход Цех №2)", "ГИС Надым ГП-2", "УЗПД ГИС-12"],
         "Средняя ТТР (°C)": [-10.125, -6.986, 7.189],
-        "Порог ОСТ (°C)": [-14.0, -14.0, -14.0],
-        "Период превышения": [
+        "Период анализа": [
             "31.05.2021 00:00 - 03.06.2021 06:15",
             "03.06.2021 09:17 - 03.06.2021 21:34",
             "02.06.2021 18:02 - 02.06.2021 21:11"
@@ -73,7 +70,7 @@ async def export_report_data(parameters: Dict[str, Any], format: str = "excel"):
     }
     df = pd.DataFrame(report_data)
     if format == "excel":
-        return create_excel_response(df, "ost_exceedance_report.xlsx")
+        return create_excel_response(df, "analysis_report.xlsx")
     else:
         raise HTTPException(status_code=400, detail="Unsupported export format")
 
@@ -85,9 +82,7 @@ async def export_calculated_data(parameters: Dict[str, Any], format: str = "exce
             "31.05.2021 00:00", "31.05.2021 01:00", "31.05.2021 02:00",
             "31.05.2021 03:00", "07.06.2021 07:00", "07.06.2021 08:00"
         ],
-        "Содержание влаги по ОСТ (т)": [0.1481852, 0.1482154, 0.1461716, 0.1460094, 0.1430151, 0.1451667],
         "Содержание влаги (т)": [0.0760775, 0.0758579, 0.0738977, 0.0738821, 0.0657523, 0.0676737],
-        "Разница (т)": [0.0721077, 0.0723575, 0.0722739, 0.0721273, 0.0772628, 0.0774931],
         "В 1 куб. м (мг)": [61.785484, 61.607729, 61.081591, 61.1202, 54.974839, 55.736813]
     }
     df = pd.DataFrame(calculated_data)
@@ -122,7 +117,7 @@ async def get_export_formats():
             {
                 "type": "report",
                 "description": "Отчетные данные",
-                "supported_reports": ["exceeded_ost", "water_intrusion"]
+                "supported_reports": ["water_intrusion"]
             },
             {
                 "type": "calculated_data",

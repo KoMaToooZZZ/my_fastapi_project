@@ -11,21 +11,6 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 # Схемы для запросов и ответов
-class ExceededOstRequest(BaseModel):
-    start_date: str
-    end_date: str
-    exceedance_threshold: float = 3.0
-    duration_threshold: int = 2
-    measurement_point_ids: List[int]
-    season: str = "summer"
-
-class ExceededOstResponse(BaseModel):
-    point_name: str
-    average_dew_point: float
-    ost_threshold: float
-    exceedance_period: str
-    duration_hours: float
-
 class WaterIntrusionRequest(BaseModel):
     start_date: str
     end_date: str
@@ -39,35 +24,6 @@ class InputOutputSummaryRequest(BaseModel):
     data_interval: str = "hourly"
 
 # Эндпоинты
-@router.post("/reports/exceeded-ost", response_model=List[ExceededOstResponse])
-async def find_exceeded_ost_report(
-    request: ExceededOstRequest,
-    db: Session = Depends(get_db)
-):
-    """Отчет 'Поиск превышения температуры точки росы по ОСТ'"""
-    try:
-        # Временная заглушка с тестовыми данными
-        mock_data = [
-            {
-                "point_name": "КС-17 (Вход Цех №2)",
-                "average_dew_point": -10.125,
-                "ost_threshold": -14.0,
-                "exceedance_period": "2024-01-01 00:00 - 2024-01-01 02:00",
-                "duration_hours": 2.0
-            },
-            {
-                "point_name": "ГИС Надым ГП-2",
-                "average_dew_point": -6.986,
-                "ost_threshold": -14.0,
-                "exceedance_period": "2024-01-01 09:17 - 2024-01-01 11:17",
-                "duration_hours": 2.0
-            }
-        ]
-        return mock_data
-    except Exception as e:
-        logger.error(f"Error in exceeded OST report: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 @router.post("/reports/water-intrusion-events")
 async def find_water_intrusion_events(
     request: WaterIntrusionRequest,
@@ -156,5 +112,5 @@ async def reports_health():
         "status": "healthy",
         "module": "reports",
         "timestamp": datetime.now().isoformat(),
-        "endpoints": ["exceeded-ost", "water-intrusion-events", "input-output-summary"]
+        "endpoints": ["water-intrusion-events", "input-output-summary"]
     }
